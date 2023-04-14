@@ -2,16 +2,8 @@ import csv
 import os
 from typing import List, Any, IO
 
-from config import NUM_START_WITH
-
-APPEND_OPT = "a"
-READ_OPT = "r"
-WRITE_OPT = "w"
-
-CSV_TYPE = ".csv"
-TXT_TYPE = ".txt"
-UIDS_TYPE = ".uids"
-STABLE_TYPE = ".stable"
+from config import TXT_TYPE, CSV_TYPE, READ_OPT, WRITE_OPT, APPEND_OPT, NUM_START_WITH, DELIM, ENCOD, HIDDEN_FILE
+from process_row import check_frmt_row, process_row
 
 
 def create_dir(path_: str) -> None:
@@ -49,7 +41,7 @@ def check_file(path_: str) -> bool:
     :return: True if the file has suitable configurations, otherwise False.
     """
     file_name = os.path.basename(path_)  # Get the file name from the path to it.
-    return file_name.endswith((TXT_TYPE, CSV_TYPE)) and not file_name.startswith(".") and os.path.exists(path_)
+    return file_name.endswith((TXT_TYPE, CSV_TYPE)) and not file_name.startswith(HIDDEN_FILE) and os.path.exists(path_)
 
 
 def get_files_lst_in_dir(fold_path_: str) -> List[str]:
@@ -61,27 +53,6 @@ def get_files_lst_in_dir(fold_path_: str) -> List[str]:
     """
     return [os.path.join(fold_path_, file) for file in os.listdir(fold_path_)
             if check_file(os.path.join(fold_path_, file))]
-
-
-def process_row(row_: str | List[str]) -> str:
-    """
-
-    :param row_:
-    :return:
-    """
-    return row_[0].strip() if isinstance(row_, List) else row_.strip()
-
-
-def check_frmt_row(row_: str | List[str]) -> bool:
-    """
-
-    :param row_:
-    :return:
-    """
-    def _check_row() -> bool:
-        return process_row(row_).isdigit()
-
-    return _check_row() if (isinstance(row_, List) and len(row_)) else (_check_row() if row_ is not None else False)
 
 
 def sort_fast(lst_: List[int]) -> List[int]:
@@ -164,7 +135,7 @@ def read_file(file_path_: str) -> List[int]:
         """
         with open(file_path_, newline="") as csv_file:
             try:
-                return [int(process_row(row)) for row in csv.reader(csv_file, delimiter=",") if check_frmt_row(row)]
+                return [int(process_row(row)) for row in csv.reader(csv_file, delimiter=DELIM) if check_frmt_row(row)]
 
             except IndexError:
                 pass
@@ -208,7 +179,7 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
         :param path_:
         :return:
         """
-        return open(path_, "w") if file_type_ == TXT_TYPE else open(path_, "a", newline="", encoding="utf-8")
+        return open(path_, WRITE_OPT) if file_type_ == TXT_TYPE else open(path_, APPEND_OPT, newline="", encoding=ENCOD)
 
     def _change_file_name() -> str:
         """
@@ -236,6 +207,9 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
         if first_row_:
             _write_row(first_row_)
 
+    def check_limit() -> bool:
+        return (limit_ is not None) and (file_to_write.tell() >= limit_)
+
     def _division_into_parts() -> None:
         """
 
@@ -243,7 +217,7 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
         """
         nonlocal file_to_write, count_f
 
-        if (file_to_write is None) or ((limit_ is not None) and (file_to_write.tell() >= limit_)):
+        if (file_to_write is None) or check_limit():
             if file_to_write is not None:
                 file_to_write.close()
             file_to_write = _open_file(_change_file_name())
@@ -258,7 +232,3 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
         count_r += 1
 
     file_to_write.close()
-
-
-if __name__ == '__main__':
-    pass
