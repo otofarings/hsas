@@ -4,6 +4,11 @@ from dotenv import load_dotenv
 
 
 def convert_megabytes_to_bytes(num_of_mb_: int) -> int:
+    """
+    Convert megabytes to bytes.
+    :param num_of_mb_: A number of megabytes.
+    :return: A number of bytes.
+    """
     return num_of_mb_ * (1024 * 1024)
 
 
