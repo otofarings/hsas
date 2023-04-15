@@ -155,7 +155,7 @@ def read_file(file_path_: str) -> List[int]:
         """
         return _read_csv() if file_path_.endswith(CSV_TYPE) else _read_txt()
 
-    return clean_fast(sort_fast(_get_data())) if check_file(file_path_) else list()
+    return clean_fast(sort_fast(_get_data())) if check_file(file_path_) else []
 
 
 def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: str = CSV_TYPE, limit_: int = None,
