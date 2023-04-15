@@ -1,47 +1,95 @@
+from typing import List, Tuple
+
 from config import INPUT_DELIM, FILE_TYPE, FIRST_INPUT, FIRST_ROW, LIMIT, SPACES, SALT, SECOND_INPUT
-from process_file import get_files_lst_in_dir, read_file, save_file
+from process_file import get_files_lst_in_dir, get_lst_of_msisdn, save_file
 from hashing import hash_lst
 
 
-def run_hashing(fold_path_: str, spaces_lst_: list) -> None:
+def hash_and_process_file(file_path_: str, msisdn_lst_: List[int], space_: str) -> None:
     """
-
-    :param fold_path_:
-    :param spaces_lst_:
+    Hashing a list of msisdn and save it to a file.
+    :param file_path_: A path to file.
+    :param msisdn_lst_: A list of bytes.
+    :param space_: A space.
     :return:
     """
-    files_lst = get_files_lst_in_dir(fold_path_)
-    while len(files_lst) > 0:
-        file_path = files_lst.pop()
-        msisdn_lst = read_file(file_path)
+    save_file(
+        file_path_=file_path_,
+        msisdn_lst_=hash_lst(msisdn_lst_, salt_=SPACES[space_][SALT]),
+        space_=space_,
+        file_type_=SPACES[space_][FILE_TYPE],
+        limit_=SPACES[space_][LIMIT],
+        first_row_=SPACES[space_][FIRST_ROW]
+    )
 
+
+def hash_by_iter_space(file_path_: str, msisdn_lst_: List[int], spaces_lst_: List[str]) -> None:
+    """
+    Hashing a list of msisdn by iteration spaces.
+    :param file_path_: A path to file.
+    :param msisdn_lst_: A list of msisdn.
+    :param spaces_lst_: A list of spaces.
+    :return:
+    """
+    count_s = 0
+    while count_s < len(spaces_lst_):
+        space = spaces_lst_[count_s]
+        hash_and_process_file(file_path_, msisdn_lst_, space)
+
+        count_s += 1
+
+
+def iter_and_process_file(paths_of_files_lst_: List[str], spaces_lst_: List[str]) -> None:
+    """
+    Run hashing function.
+    :param paths_of_files_lst_: A list of paths to files.
+    :param spaces_lst_: A list of spaces.
+    :return:
+    """
+    count_f = 0
+    while count_f < len(paths_of_files_lst_):
+        file_path = paths_of_files_lst_[count_f]
+        msisdn_lst = get_lst_of_msisdn(file_path)
         if len(msisdn_lst):
-            spaces_count = 0
-            while spaces_count < len(spaces_lst_):
-                space = spaces_lst_[spaces_count]
-                msisdn_hash_lst = hash_lst(msisdn_lst, salt_=SPACES[space][SALT])
-                save_file(
-                    file_path_=file_path,
-                    msisdn_lst_=msisdn_hash_lst,
-                    space_=space,
-                    file_type_=SPACES[space][FILE_TYPE],
-                    limit_=SPACES[space][LIMIT] if SPACES[space][LIMIT] is not None else None,
-                    first_row_=SPACES[space][FIRST_ROW]
-                )
+            hash_by_iter_space(file_path, msisdn_lst, spaces_lst_)
 
-                spaces_count += 1
+        count_f += 1
+
+
+def get_input() -> Tuple[List[str], List[str]]:
+    """
+    Get input from user.
+    :return: A list of paths to files and a list of spaces.
+    """
+    def _get_first_input() -> List[str]:
+        """
+        Get first input from user.
+        :return: A list of paths to files.
+        """
+        fold_path = input(FIRST_INPUT)
+        return get_files_lst_in_dir(fold_path)
+
+    def _get_second_input() -> List[str]:
+        """
+        Get second input from user.
+        :return: A list of spaces.
+        """
+        spaces = input(SECOND_INPUT)
+        return spaces.split(INPUT_DELIM)
+
+    return _get_first_input(), _get_second_input()
 
 
 def start_script() -> None:
     """
-
+    Start script. Get input from user and run hashing function.
     :return:
     """
     try:
-        run_hashing(
-            input(FIRST_INPUT),
-            [sp.strip() for sp in input(SECOND_INPUT).split(INPUT_DELIM)]
-        )
+        paths_of_files_lst, spaces_lst = get_input()
+        if paths_of_files_lst and spaces_lst:
+            iter_and_process_file(paths_of_files_lst, spaces_lst)
+
     except (KeyboardInterrupt, SystemExit):
         pass
 

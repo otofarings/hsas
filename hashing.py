@@ -5,26 +5,42 @@ from typing import List
 from config import BYTEORDER, ENCOD, SALT_ENCOD
 
 
-def hash_lst(lst_: List[int], count_: int = 0, salt_: str = None) -> List[str]:
+def hash_md5(str_to_hash_: str) -> str:
     """
-
-    :param lst_:
-    :param count_:
-    :param salt_:
-    :return:
+    Hashing a string.
+    :param str_to_hash_: A string to hash.
+    :return: A hashed string.
     """
-    hash_msisdn_lst = []
-    while count_ < len(lst_):
-        msisdn = str(lst_[count_])
+    return hs.md5(bytes(str_to_hash_.strip(), encoding=ENCOD)).hexdigest()
 
-        if salt_ is None:
-            hash_msisdn = hs.md5(bytes(msisdn.strip(), encoding=ENCOD)).hexdigest()
-        else:
-            hash_msisdn = base64.urlsafe_b64encode(
-                hs.md5(salt_.encode(SALT_ENCOD) + bytes(int(msisdn.strip()).to_bytes(8, BYTEORDER))).digest()
-            ).decode(SALT_ENCOD)
 
-        hash_msisdn_lst.append(hash_msisdn)
-        count_ += 1
+def hash_md5_salt(str_to_hash_: str, salt_: str) -> str:
+    """
+    Hashing a string with a secret key.
+    :param str_to_hash_: A string to hash.
+    :param salt_: A secret key to hash the string.
+    :return: A hashed string.
+    """
+    return base64.urlsafe_b64encode(
+        hs.md5(salt_.encode(SALT_ENCOD) + bytes(int(str_to_hash_.strip()).to_bytes(8, BYTEORDER))).digest()
+    ).decode(SALT_ENCOD)
 
-    return hash_msisdn_lst
+
+def choose_hash_method(str_to_hash_: str, salt_: str = None) -> str:
+    """
+    Choose the method of hashing.
+    :param str_to_hash_: A string to hash.
+    :param salt_: A secret key to hash the string.
+    :return: A hashed string.
+    """
+    return hash_md5(str_to_hash_) if salt_ is None else hash_md5_salt(str_to_hash_, salt_)
+
+
+def hash_lst(lst_: List[int], salt_: str = None) -> List[str]:
+    """
+    Hashing a list of msisdn.
+    :param lst_: A list of msisdn.
+    :param salt_: A secret key to hash the msisdn.
+    :return: A list of hashed msisdn.
+    """
+    return [choose_hash_method(str(msisdn).strip(), salt_) for msisdn in lst_]
