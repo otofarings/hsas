@@ -50,7 +50,7 @@ def iter_and_process_file(paths_of_files_lst_: List[str], spaces_lst_: List[str]
     while count_f < len(paths_of_files_lst_):
         file_path = paths_of_files_lst_[count_f]
         msisdn_lst = get_lst_of_msisdn(file_path)
-        if len(msisdn_lst):
+        if msisdn_lst:
             hash_by_iter_space(file_path, msisdn_lst, spaces_lst_)
 
         count_f += 1
