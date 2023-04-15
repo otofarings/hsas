@@ -18,5 +18,4 @@ def check_frmt_row(row_: str | List[str]) -> bool:
     """
     if (isinstance(row_, List) and len(row_)) or isinstance(row_, str):
         return process_row(row_).isdigit()
-    else:
-        return False
+    return False
