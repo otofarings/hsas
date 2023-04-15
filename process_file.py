@@ -39,9 +39,8 @@ def check_file(fold_path_: str, file_path_: str) -> bool:
     :param file_path_: A string containing name of the file.
     :return: True if the file has suitable configurations, otherwise False.
     """
-    if os.path.isdir(fold_path_):
-        if os.path.exists(os.path.join(fold_path_, file_path_)):
-            return file_path_.endswith((TXT_TYPE, CSV_TYPE)) and not file_path_.startswith(HIDDEN_FILE)
+    if os.path.isdir(fold_path_) and os.path.exists(os.path.join(fold_path_, file_path_)):
+        return file_path_.endswith((TXT_TYPE, CSV_TYPE)) and not file_path_.startswith(HIDDEN_FILE)
     return False
 
 
@@ -108,19 +107,19 @@ def sort_fast(lst_: List[int]) -> List[int]:
     return lst_
 
 
-def clean_fast(lst_: List[int], count_: int = 0) -> List[int]:
+def clean_fast(lst_: List[int]) -> List[int]:
     """
     Cleaning a list of integers.
     :param lst_: A list of integers.
-    :param count_: A number indicating the start of the list.
+    :return: A list of integers without duplicates and starting with the number 7.
     """
     values = []
+    count = 0
+    while count < len(lst_):
+        if (not values or lst_[count] != values[-1]) and str(lst_[count]).startswith(NUM_START_WITH):
+            values.append(lst_[count])
 
-    while count_ < len(lst_):
-        if (not values or lst_[count_] != values[-1]) and str(lst_[count_]).startswith(NUM_START_WITH):
-            values.append(lst_[count_])
-
-        count_ += 1
+        count += 1
 
     return values
 
@@ -188,7 +187,7 @@ def get_lst_of_msisdn(file_path_: str) -> List[int] | None:
 
 
 def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: str = CSV_TYPE, limit_: int = None,
-              first_row_: str = None, file_to_write: IO = None, count_r: int = 1, count_f: int = 1) -> None:
+              first_row_: str = None, file_to_write: IO = None) -> None:
     """
     Save data to file.
     :param file_path_: Path to file.
@@ -197,25 +196,47 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
     :param limit_: Limit of bytes in file.
     :param first_row_: First row in file.
     :param file_to_write: File to write.
-    :param count_f: Count of files.
-    :param count_r: Count of rows.
     :param space_: Ad space for witch file creating.
     :return:
     """
-    def _open_file(path_: str) -> IO:
+    def _open_file(path_: str) -> None:
         """
         Open file.
         :param path_: Path to file.
-        :return: File.
+        :return: A file object.
         """
-        return open(path_, WRITE_OPT) if file_type_ == TXT_TYPE else open(path_, APPEND_OPT, newline="", encoding=ENCOD)
+        def open_csv() -> IO:
+            """
+            Open csv file.
+            :return: A file object.
+            """
+            return open(path_, APPEND_OPT, newline="", encoding=ENCOD)
 
-    def _change_file_name() -> str:
+        def open_txt() -> IO:
+            """
+            Open txt file.
+            :return: A file object.
+            """
+            return open(path_, WRITE_OPT)
+
+        nonlocal file_to_write
+        file_to_write = open_txt() if file_type_ == TXT_TYPE else open_csv()
+
+    def _close_file() -> None:
         """
-        Change file name.
-        :return: New file name.
+        Close file.
+        :return:
         """
-        return file_path_.replace(file_path_[-4:], f"_{count_f}_{space_}{file_type_}")
+        if file_to_write is not None:
+            file_to_write.close()
+
+    def _write_first_row() -> None:
+        """
+        Write first row in file.
+        :return:
+        """
+        if first_row_:
+            _write_row(first_row_)
 
     def _write_row(msisdn_hash_: Any) -> None:
         """
@@ -228,41 +249,38 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
         else:
             csv.writer(file_to_write).writerow([msisdn_hash_])
 
-    def _write_first_row() -> None:
-        """
-        Write first row in file.
-        :return:
-        """
-        if first_row_:
-            _write_row(first_row_)
-
-    def check_limit() -> bool:
+    def _check_limit() -> bool:
         """
         Check limit of bytes in file.
         :return: True if limit is reached.
         """
         return (limit_ is not None) and (file_to_write.tell() >= limit_)
 
+    def _change_file_name() -> str:
+        """
+        Change file name.
+        :return: New file name.
+        """
+        return file_path_.replace(file_path_[-4:], f"_{count_f}_{space_}{file_type_}")
+
     def _division_into_parts() -> None:
         """
         Division into parts.
         :return:
         """
-        nonlocal file_to_write, count_f
-
-        if (file_to_write is None) or check_limit():
-            if file_to_write is not None:
-                file_to_write.close()
-
-            file_to_write = _open_file(_change_file_name())
+        nonlocal count_f
+        if (file_to_write is None) or _check_limit():
+            _close_file()
+            _open_file(_change_file_name())
             _write_first_row()
 
             count_f += 1
 
+    count_r, count_f = 0, 1  # count_r - count of rows, count_f - count of files
     while count_r < len(msisdn_lst_):
         _division_into_parts()
         _write_row(msisdn_lst_[count_r])
 
         count_r += 1
 
-    file_to_write.close()
+    _close_file()
