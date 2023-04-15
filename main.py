@@ -15,7 +15,7 @@ def run_hashing(fold_path_: str, spaces_lst_: list) -> None:
         file_path = files_lst.pop()
         msisdn_lst = read_file(file_path)
 
-        if len(msisdn_lst):
+        if msisdn_lst:
             spaces_count = 0
             while spaces_count < len(spaces_lst_):
                 space = spaces_lst_[spaces_count]
