@@ -184,8 +184,7 @@ def get_lst_of_msisdn(file_path_: str) -> List[int] | None:
     lst_of_msisdn = _create_lst_of_msisdn()
     if lst_of_msisdn:
         return clean_fast(sort_fast(lst_of_msisdn))
-    else:
-        return None
+    return None
 
 
 def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: str = CSV_TYPE, limit_: int = None,
