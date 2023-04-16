@@ -199,10 +199,10 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
     :param space_: Ad space for witch file creating.
     :return:
     """
-    def _open_file(path_: str) -> None:
+    def _open_file(path_to_open_: str) -> None:
         """
         Open file.
-        :param path_: Path to file.
+        :param path_to_open_: Path to file.
         :return: A file object.
         """
         def open_csv() -> IO:
@@ -210,14 +210,14 @@ def save_file(file_path_: str, msisdn_lst_: List[str], space_: str, file_type_: 
             Open csv file.
             :return: A file object.
             """
-            return open(path_, APPEND_OPT, newline="", encoding=ENCOD)
+            return open(path_to_open_, APPEND_OPT, newline="", encoding=ENCOD)
 
         def open_txt() -> IO:
             """
             Open txt file.
             :return: A file object.
             """
-            return open(path_, WRITE_OPT)
+            return open(path_to_open_, WRITE_OPT)
 
         nonlocal file_to_write
         file_to_write = open_txt() if file_type_ == TXT_TYPE else open_csv()
