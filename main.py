@@ -63,7 +63,7 @@ def get_input() -> Tuple[List[str], List[str]]:
     """
     def _get_first_input() -> List[str]:
         """
-        Get first input from user.
+        Get first input from user. First input is a path to directory.
         :return: A list of paths to files.
         """
         fold_path = input(FIRST_INPUT)
@@ -71,7 +71,7 @@ def get_input() -> Tuple[List[str], List[str]]:
 
     def _get_second_input() -> List[str]:
         """
-        Get second input from user.
+        Get second input from user. Second input is a list of spaces.
         :return: A list of spaces.
         """
         spaces = input(SECOND_INPUT)

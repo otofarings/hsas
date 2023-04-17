@@ -12,25 +12,27 @@ def convert_megabytes_to_bytes(num_of_mb_: int) -> int:
     return num_of_mb_ * (1024 * 1024)
 
 
-load_dotenv()
+load_dotenv()  # Load environment variables from .env file
 
-APPEND_OPT = "a"
-READ_OPT = "r"
-WRITE_OPT = "w"
+APPEND_OPT = "a"  # Option to append data to file
+READ_OPT = "r"  # Option to read data from file
+WRITE_OPT = "w"  # Option to write data to file
 
-ENCOD = "utf-8"
-SALT_ENCOD = "ASCII"
-BYTEORDER = "big"
+ENCOD = "utf-8"  # Encoding used to convert strings to bytes and back
+SALT_ENCOD = "ASCII"  # Encoding used to convert salt to bytes and back
+BYTEORDER = "big"  # Byte order used to convert integers to bytes and back
 
-DELIM = ","
-INPUT_DELIM = ", "
-HIDDEN_FILE = "."
+DELIM = ","  # Delimiter for csv file
+INPUT_DELIM = ", "  # Delimiter for input file
+HIDDEN_FILE = "."  # Hidden file
 
+# File extensions
 CSV_TYPE = ".csv"
 TXT_TYPE = ".txt"
 UIDS_TYPE = ".uids"
 STABLE_TYPE = ".stable"
 
+# Ad spaces names for witch file creating
 AR_SPACE = "AdRiver"
 BZ_SPACE = "Buzzoola"
 DV_SPACE = "DV360"
@@ -45,10 +47,12 @@ ALL_SPACES = (AR_SPACE, BZ_SPACE, DV_SPACE, FB_SPACE, IG_SPACE, MT_SPACE, OTM_SP
 
 NUM_START_WITH = "7"  # Country code at the beginning of the phone number
 
-SALT = "salt"
-LIMIT = "limit"
-FILE_TYPE = "file_type"
-FIRST_ROW = "first_row"
+SALT = "salt"  # Secret key for hashing
+LIMIT = "limit"  # Limit of bytes in file
+FILE_TYPE = "file_type"  # File extension
+FIRST_ROW = "first_row"  # First row in file
+
+overfill_insurance = convert_megabytes_to_bytes(10)  # 10 MB for insurance of max size of file
 
 SPACES = {
     # AdRiver: hash md5 with salt + .stable
@@ -91,7 +95,7 @@ SPACES = {
         FIRST_ROW: None,
         FILE_TYPE: TXT_TYPE,
         SALT: None,
-        LIMIT: convert_megabytes_to_bytes(128)
+        LIMIT: convert_megabytes_to_bytes(128) - overfill_insurance
     },
     # OTM: hash md5 with salt + .stable
     OTM_SPACE: {
@@ -105,14 +109,14 @@ SPACES = {
         FIRST_ROW: None,
         FILE_TYPE: TXT_TYPE,
         SALT: None,
-        LIMIT: convert_megabytes_to_bytes(128)
+        LIMIT: convert_megabytes_to_bytes(128) - overfill_insurance
     },
     # Yandex: "phone" + hash md5 + .csv (min 100, max ...)
     YD_SPACE: {
         FIRST_ROW: "phone",
         FILE_TYPE: CSV_TYPE,
         SALT: None,
-        LIMIT: convert_megabytes_to_bytes(1000)
+        LIMIT: convert_megabytes_to_bytes(1000) - overfill_insurance
     },
     # YouTube: "Phone" + msisdn + .csv
     YT_SPACE: {

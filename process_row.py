@@ -13,6 +13,7 @@ def process_row(row_: str | List[str]) -> str:
 def check_frmt_row(row_: str | List[str]) -> bool:
     """
     Check if a row is valid.
+    A row is valid if it is a string or a list of strings and if it contains only digits.
     :param row_: A string or a list of strings.
     :return: True if the row is valid, False otherwise.
     """
