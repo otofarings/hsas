@@ -40,6 +40,7 @@ FB_SPACE = "Facebook"
 IG_SPACE = "Instagram"
 MT_SPACE = "MyTarget"
 OTM_SPACE = "OTM"
+SP_SPACE = "Sape"
 VK_SPACE = "VKontakte"
 YD_SPACE = "Yandex"
 YT_SPACE = "YouTube"
@@ -102,6 +103,13 @@ SPACES = {
         FIRST_ROW: None,
         FILE_TYPE: STABLE_TYPE,
         SALT: os.getenv(OTM_SPACE.upper()),
+        LIMIT: None
+    },
+    # Sape: hash md5 with salt + .stable
+    SP_SPACE: {
+        FIRST_ROW: None,
+        FILE_TYPE: STABLE_TYPE,
+        SALT: os.getenv(SP_SPACE.upper()),
         LIMIT: None
     },
     # VKontakte: hash + .txt (min 2000, max 5000000)
